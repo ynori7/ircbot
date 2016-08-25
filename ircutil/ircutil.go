@@ -6,15 +6,12 @@ import (
 	"fmt"
 	"strings"
 	"regexp"
+	"github.com/ynori7/ircbot/ircconfig"
 )
 
 type IrcConnection struct {
-	ConnectionString string
-	UseSSL bool
-	Nick string
-	IrcChannel string
+	Config ircconfig.IrcConfig
 	Connection net.Conn
-	InputChannel chan string
 }
 
 type IrcMessage struct {
@@ -33,15 +30,15 @@ type IrcUser struct {
 }
 
 func (c *IrcConnection) Connect() (err error) {
-	if c.UseSSL {
-		c.Connection, err = tls.Dial("tcp", c.ConnectionString, &tls.Config{InsecureSkipVerify : true})
+	if c.Config.UseSSL {
+		c.Connection, err = tls.Dial("tcp", c.Config.ConnectionString, &tls.Config{InsecureSkipVerify : true})
 	} else {
-		c.Connection, err = net.Dial("tcp", c.ConnectionString)
+		c.Connection, err = net.Dial("tcp", c.Config.ConnectionString)
 	}
 
 	if err == nil {
-		fmt.Fprintf(c.Connection, "USER %s %s %s :%s\r\n", c.Nick, c.Nick, c.Nick, c.Nick)
-		fmt.Fprintf(c.Connection, "NICK %s\r\n", c.Nick)
+		fmt.Fprintf(c.Connection, "USER %s %s %s :%s\r\n", c.Config.Nick, c.Config.Nick, c.Config.Nick, c.Config.Nick)
+		fmt.Fprintf(c.Connection, "NICK %s\r\n", c.Config.Nick)
 	}
 
 	return err

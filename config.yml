@@ -1,0 +1,5 @@
+connection_string: "irc.psych0tik.net:6697"
+nick: blorgleflorp
+channels:
+  - "#lore"
+use_ssl: true

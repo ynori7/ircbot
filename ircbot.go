@@ -2,10 +2,14 @@ package main
 
 import (
 	"bufio"
+	"io/ioutil"
 	"fmt"
 	"os"
+	"log"
 	"strings"
+	"github.com/ynori7/ircbot/ircconfig"
 	"github.com/ynori7/ircbot/ircutil"
+	"errors"
 )
 
 func HandleMessage(conn ircutil.IrcConnection, message string) {
@@ -16,16 +20,16 @@ func HandleMessage(conn ircutil.IrcConnection, message string) {
 		conn.Pong(line.Sender)
 	}
 	//001 appears when we've connected and the server starts talking to us
-	if line.Type == "001" || (line.Type == "KICK" && line.Message == conn.Nick){
-		conn.JoinChannel(conn.IrcChannel)
+	if line.Type == "001" || (line.Type == "KICK" && line.Message == conn.Config.Nick){
+		conn.JoinChannel(conn.Config.Channels[0]) //TODO: rejoin the channel I was kicked from
 	}
-	if line.Type == "JOIN" && sender.Nick != conn.Nick {
+	if line.Type == "JOIN" && sender.Nick != conn.Config.Nick {
 		conn.SendMessage("hey " + sender.Nick, line.Location)
 	}
-	if line.Type == "PRIVMSG" && strings.Contains(line.Message, "hello "+conn.Nick) {
+	if line.Type == "PRIVMSG" && strings.Contains(line.Message, "hello "+conn.Config.Nick) {
 		loc := line.Location
 
-		if(line.Location == conn.Nick) {
+		if(line.Location == conn.Config.Nick) {
 			loc = sender.Nick
 		}
 
@@ -34,18 +38,24 @@ func HandleMessage(conn ircutil.IrcConnection, message string) {
 }
 
 func main() {
-	conn := ircutil.IrcConnection{
-		Nick: "blorgleflorp",
-		IrcChannel: "#lore",
-		ConnectionString: "irc.psych0tik.net:6697",
-		UseSSL: true,
-		InputChannel: make(chan string),
+	if len(os.Args) < 2 {
+		log.Fatal(errors.New("You must specify the path to the config file."))
 	}
-	err := conn.Connect()
+
+	data, err := ioutil.ReadFile(os.Args[1])
+	if err != nil {
+		log.Fatal(err)
+	}
+	var config ircconfig.IrcConfig
+	if err := config.Parse(data); err != nil {
+		log.Fatal(err)
+	}
+
+	conn := ircutil.IrcConnection{Config: config}
+	err = conn.Connect()
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	connbuf := bufio.NewReader(conn.Connection)
@@ -57,8 +67,7 @@ func main() {
 			go HandleMessage(conn, str)
 		}
 		if err!= nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 	}
 
