@@ -16,7 +16,7 @@ type IrcConnection struct {
 
 type IrcMessage struct {
 	Type string
-	Sender string
+	Sender IrcUser
 	Location string
 	Message string
 	Raw string
@@ -69,14 +69,14 @@ func (c *IrcConnection) ParseLine(msg string) (IrcMessage) {
 
 	if strings.HasPrefix(msg, "PING") {
 		ircMsg.Type = "PING"
-		ircMsg.Sender = strings.Fields(msg)[1]
+		ircMsg.Message = strings.Fields(msg)[1]
 	} else {
 		if strings.HasPrefix(msg, ":") {
 			msg = msg[1:]
 		}
 
 		tmp := strings.Fields(msg)
-		ircMsg.Sender = tmp[0]
+		ircMsg.Sender = ParseUserString(tmp[0])
 		ircMsg.Type = tmp[1]
 
 		//For JOIN there's a : in front
@@ -85,7 +85,9 @@ func (c *IrcConnection) ParseLine(msg string) (IrcMessage) {
 		}
 		ircMsg.Location = tmp[2]
 
-		if len(tmp) >= 3  && strings.Contains(msg, ":") {
+		if ircMsg.Type == "KICK" && len(tmp) >= 3 { //for KICK it ends with "username :"
+			ircMsg.Message = tmp[3]
+		} else if len(tmp) >= 3  && strings.Contains(msg, ":") {
 			ircMsg.Message = strings.TrimSpace(strings.SplitAfterN(msg, ":", 2)[1])
 		}
 	}
