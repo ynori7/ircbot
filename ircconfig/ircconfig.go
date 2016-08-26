@@ -2,6 +2,7 @@ package ircconfig
 
 import (
 	"errors"
+	"math/rand"
 	"gopkg.in/yaml.v2"
 )
 
@@ -10,6 +11,7 @@ type IrcConfig struct {
 	Nick string
 	Channels []string `yaml:",flow"`
 	UseSSL bool `yaml:"use_ssl"`
+	Greetings []string `yaml:",flow"`
 }
 
 func (c *IrcConfig) Parse(data []byte) error {
@@ -24,5 +26,13 @@ func (c *IrcConfig) Parse(data []byte) error {
 		return errors.New("IrcConfig: invalid `Nick`")
 	}
 
+	if len(c.Greetings) == 0 {
+		c.Greetings = []string{"hi"} //put something in there so it can still talk
+	}
+
 	return nil
+}
+
+func (c IrcConfig) GetRandomGreeting() string {
+	return c.Greetings[rand.Intn(len(c.Greetings))]
 }

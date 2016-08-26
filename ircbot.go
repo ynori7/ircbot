@@ -29,11 +29,11 @@ func HandleMessage(conn ircutil.IrcConnection, message string) {
 		fmt.Printf("%v", line.Message)
 	}
 	if line.Type == "KICK" && line.Message == conn.Config.Nick {
-		conn.JoinChannel(line.Location) //rejoin the channel you were kicked from
+		conn.JoinChannel(line.Location) //rejoin the channel I was kicked from
 	}
 
 	if line.Type == "JOIN" && line.Sender.Nick != conn.Config.Nick {
-		conn.SendMessage("hey " + line.Sender.Nick, line.Location)
+		conn.SendMessage(conn.Config.GetRandomGreeting() + " " + line.Sender.Nick, line.Location)
 	}
 	if line.Type == "PRIVMSG" {
 		Conversation(conn, line)
@@ -46,9 +46,25 @@ func Conversation(conn ircutil.IrcConnection, line ircutil.IrcMessage) {
 		location = line.Sender.Nick
 	}
 
-	if strings.Contains(line.Message, "hello "+conn.Config.Nick) {
-		conn.SendMessage("hi", location)
+	if strings.Contains(line.Message, conn.Config.Nick) { //someone is talking to me or about me
+		words := strings.Fields(line.Message)
+
+		//respond to greetings
+		if in_array(conn.Config.Greetings, strings.ToLower(words[0])){
+			conn.SendMessage(conn.Config.GetRandomGreeting(), location)
+		}
 	}
+}
+
+//I don't know why I need to write this. Seems like a function which should exist in Go
+func in_array(s []string, val string) bool {
+	for _, v := range s {
+		if v == val {
+			return true
+		}
+	}
+
+	return false
 }
 
 func main() {

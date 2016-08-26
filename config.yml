@@ -3,3 +3,8 @@ nick: blorgleflorp
 channels:
   - "#lore"
 use_ssl: true
+greetings:
+  - "hi"
+  - "hello"
+  - "sup"
+  - "hey"
