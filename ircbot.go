@@ -13,6 +13,9 @@ import (
 	"github.com/ynori7/ircbot/ircutil"
 )
 
+/**
+ * Performs the designated action according to the content of the message received.
+ */
 func HandleMessage(conn ircutil.IrcConnection, message string) {
 	line := conn.ParseLine(message)
 
@@ -38,6 +41,9 @@ func HandleMessage(conn ircutil.IrcConnection, message string) {
 	}
 }
 
+/**
+ * Handles conversational type messages like talking to other users.
+ */
 func Conversation(conn ircutil.IrcConnection, line ircutil.IrcMessage) {
 	location := line.Location
 	//Handle the case when user is talking to me in private message, not in channel
@@ -55,10 +61,13 @@ func Conversation(conn ircutil.IrcConnection, line ircutil.IrcMessage) {
 	}
 }
 
-//I don't know why I need to write this. Seems like a function which should exist in Go
-func in_array(s []string, val string) bool {
-	for _, v := range s {
-		if v == val {
+/**
+ * Returns true if needle occurs in haystack, otherwise false.
+ * Not sure why there isn't already a function for this.
+ */
+func in_array(haystack []string, needle string) bool {
+	for _, v := range haystack {
+		if v == needle {
 			return true
 		}
 	}

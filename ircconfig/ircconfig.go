@@ -14,6 +14,9 @@ type IrcConfig struct {
 	Greetings []string `yaml:",flow"`
 }
 
+/**
+ * Parse the contents of the YAML file into the IrcConfig object.
+ */
 func (c *IrcConfig) Parse(data []byte) error {
 	if err := yaml.Unmarshal(data, &c); err != nil {
 		return err
@@ -33,6 +36,9 @@ func (c *IrcConfig) Parse(data []byte) error {
 	return nil
 }
 
+/**
+ * Returns a random greeting string from the list of valid greetings.
+ */
 func (c IrcConfig) GetRandomGreeting() string {
 	return c.Greetings[rand.Intn(len(c.Greetings))]
 }

@@ -29,6 +29,9 @@ type IrcUser struct {
 	Raw string
 }
 
+/**
+ * Establish connection to the server according to the configuration.
+ */
 func (c *IrcConnection) Connect() (err error) {
 	if c.Config.UseSSL {
 		c.Connection, err = tls.Dial("tcp", c.Config.ConnectionString, &tls.Config{InsecureSkipVerify : true})
@@ -44,20 +47,30 @@ func (c *IrcConnection) Connect() (err error) {
 	return err
 }
 
+/**
+ * Send the specified message to the specified recipient or channel
+ */
 func (c *IrcConnection) SendMessage(msg string, to string) {
 	fmt.Fprintf(c.Connection, "PRIVMSG %s :%s\r\n", to, msg)
 }
 
+/**
+ * Join the specified channel
+ */
 func (c *IrcConnection) JoinChannel(channel string) {
 	fmt.Fprintf(c.Connection, "JOIN %s\r\n", channel)
 }
 
+/**
+ * Respond to server ping
+ */
 func (c *IrcConnection) Pong(server string) {
 	fmt.Fprintf(c.Connection, "PONG %s\r\n", server)
 }
 
-/*
-Samples Messages:
+/**
+ * Parses the message received from the server and returns a new IrcMessage object.
+ * Samples Messages:
 :ynori7!~ynori7@unaffiliated/ynori7 KICK #ynori7 blorgleflorps :blorgleflorps
 :blorgleflorps!~blorglefl@2001:4c50:29e:2c00:9084:4b28:8dbd:791 JOIN #ynori7
 :wolfe.freenode.net 353 blorgleflorps @ #ynori7 :blorgleflorps @ynori7
@@ -95,6 +108,11 @@ func (c *IrcConnection) ParseLine(msg string) (IrcMessage) {
 	return ircMsg
 }
 
+/**
+ * Parses the user string and returns a new IrcUser object.
+ * Example string:
+ * ynori7!~ynori7@unaffiliated/ynori7
+ */
 func ParseUserString(userString string) (IrcUser) {
 	ircUser := IrcUser{Raw: userString}
 
