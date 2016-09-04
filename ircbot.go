@@ -25,14 +25,12 @@ func HandleMessage(conn ircutil.IrcConnection, message string) {
 			conn.JoinChannel(ch)
 		}
 	}
-	if line.Type == "KICK" {
-		fmt.Printf("%v", line.Message)
-	}
+
 	if line.Type == "KICK" && line.Message == conn.Config.Nick {
 		conn.JoinChannel(line.Location) //rejoin the channel I was kicked from
 	}
 
-	if line.Type == "JOIN" && line.Sender.Nick != conn.Config.Nick {
+	if line.Type == "JOIN" && line.Sender.Nick != conn.Config.Nick { //Greet user who joined channel
 		conn.SendMessage(conn.Config.GetRandomGreeting() + " " + line.Sender.Nick, line.Location)
 	}
 	if line.Type == "PRIVMSG" {
@@ -42,6 +40,7 @@ func HandleMessage(conn ircutil.IrcConnection, message string) {
 
 func Conversation(conn ircutil.IrcConnection, line ircutil.IrcMessage) {
 	location := line.Location
+	//Handle the case when user is talking to me in private message, not in channel
 	if(line.Location == conn.Config.Nick) {
 		location = line.Sender.Nick
 	}
@@ -96,7 +95,7 @@ func main() {
 		str, err := connbuf.ReadString('\n')
 		if len(str)>0 {
 			fmt.Println(str)
-			go HandleMessage(conn, str)
+			go HandleMessage(conn, str) //handle message asynchronously so we can go back to listening
 		}
 		if err!= nil {
 			log.Fatal(err)
