@@ -11,6 +11,7 @@ import (
 
 	"github.com/ynori7/ircbot/ircconfig"
 	"github.com/ynori7/ircbot/ircutil"
+	"github.com/ynori7/ircbot/library"
 )
 
 /**
@@ -57,6 +58,13 @@ func Conversation(conn ircutil.IrcConnection, line ircutil.IrcMessage) {
 		//respond to greetings
 		if in_array(conn.Config.Greetings, strings.ToLower(words[0])){
 			conn.SendMessage(conn.Config.GetRandomGreeting(), location)
+		}
+	}
+
+	if strings.Contains(line.Message, "github.com") {
+		githubResponse := library.HandleGithubLink(line.Message)
+		if githubResponse != "" {
+			conn.SendMessage(githubResponse, location)
 		}
 	}
 }

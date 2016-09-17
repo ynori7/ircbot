@@ -10,6 +10,7 @@ Currently the bot supports the following features:
 - Greets users as they join a channel which the bot is in
 - Responds to greetings directed towards the bot
 - Automatically rejoins channels when kicked from them
+- Looks up Github repos from the Github API and shows info about it
 
 Usage
 ----
