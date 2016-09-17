@@ -41,7 +41,7 @@ func HandleGithubLink(str string) string {
  * Checks if the input string contains a link to a Github repo and prepares an object containing the pieces
  */
 func ParseGithubLink(input string) GithubRepo {
-	re, err := regexp.Compile(`(https?:\/\/)?github\.com\/(\w+)\/(\w+)`)
+	re, err := regexp.Compile(`(https?:\/\/)?github\.com\/([\w\-]+)\/([\w\-]+)`)
 	
 	if err == nil {
 		res := re.FindStringSubmatch(input)
