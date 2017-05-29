@@ -1,7 +1,11 @@
 connection_string: "irc.psych0tik.net:6697"
-nick: blorgleflorp
+nick: lore
 channels:
   - "#lore"
+moderated_channels: []
+password: "12345"
+admins:
+  - "ynori7"
 use_ssl: true
 greetings:
   - "hi"

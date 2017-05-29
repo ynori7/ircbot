@@ -2,16 +2,19 @@ package ircconfig
 
 import (
 	"errors"
-	"math/rand"
 	"gopkg.in/yaml.v2"
+	"math/rand"
 )
 
 type IrcConfig struct {
-	ConnectionString string `yaml:"connection_string"`
-	Nick string
-	Channels []string `yaml:",flow"`
-	UseSSL bool `yaml:"use_ssl"`
-	Greetings []string `yaml:",flow"`
+	ConnectionString  string `yaml:"connection_string"`
+	Nick              string
+	Password          string
+	Channels          []string `yaml:",flow"`
+	ModeratedChannels []string `yaml:"moderated_channels,flow"`
+	UseSSL            bool     `yaml:"use_ssl"`
+	Greetings         []string `yaml:",flow"`
+	Admins            []string `yaml:",flow"`
 }
 
 /**

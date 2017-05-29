@@ -2,6 +2,7 @@ package handler
 
 import (
 	"strings"
+        "time"
 
 	"github.com/ynori7/go-irc/client"
 	"github.com/ynori7/go-irc/model"
@@ -28,6 +29,8 @@ func (h Handler) Handle(conn client.Client, message model.Message) {
 	}
 
 	if message.Type == "001" { //001 appears when we've connected and the server starts talking to us
+                conn.SendMessage("identify " + h.config.Password, "NickServ")
+
 		for _, ch := range h.config.Channels { //join all the channels in the config
 			conn.JoinChannel(ch)
 		}
@@ -38,7 +41,13 @@ func (h Handler) Handle(conn client.Client, message model.Message) {
 	}
 
 	if message.Type == "JOIN" && message.Sender.Nick != conn.Nick { //Greet user who joined channel
-		conn.SendMessage(h.config.GetRandomGreeting() + " " + message.Sender.Nick, message.Location)
+		if h.in_array(h.config.ModeratedChannels, message.Location) {
+			conn.SetMode(message.Location, "+v", message.Sender.Nick)
+                }
+                go func(){ //to avoid sending the message so fast that the user doesn't notice it
+			time.Sleep(500 * time.Millisecond)
+			conn.SendMessage(h.config.GetRandomGreeting() + " " + message.Sender.Nick, message.Location)
+                }()
 	}
 	if message.Type == "PRIVMSG" {
 		h.Conversation(conn, message)
