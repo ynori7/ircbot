@@ -9,6 +9,7 @@ import (
 	"github.com/ynori7/go-irc/client"
 	"github.com/ynori7/ircbot/handler"
 	"github.com/ynori7/ircbot/ircconfig"
+	"github.com/ynori7/ircbot/service"
 )
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	commandHandler := handler.NewCommandHandler(config)
+	commandHandler := service.NewVoiceService(conn)
 	messageHandler := handler.NewMessageHandler(config, commandHandler)
 
 	conn.Listen(messageHandler.Handle)

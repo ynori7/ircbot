@@ -8,17 +8,18 @@ import (
 	"github.com/ynori7/go-irc/model"
 	"github.com/ynori7/ircbot/ircconfig"
 	"github.com/ynori7/ircbot/library"
+	"github.com/ynori7/ircbot/service"
 )
 
 type MessageHandler struct {
-	config         ircconfig.IrcConfig
-	commandHandler CommandHandler
+	config       ircconfig.IrcConfig
+	voiceService service.VoiceService
 }
 
-func NewMessageHandler(config ircconfig.IrcConfig, commandHandler CommandHandler) MessageHandler {
+func NewMessageHandler(config ircconfig.IrcConfig, voiceService service.VoiceService) MessageHandler {
 	return MessageHandler{
-		config:         config,
-		commandHandler: commandHandler,
+		config:       config,
+		voiceService: voiceService,
 	}
 }
 
@@ -31,7 +32,9 @@ func (h MessageHandler) Handle(conn client.Client, message model.Message) {
 	}
 
 	if message.Type == "001" { //001 appears when we've connected and the server starts talking to us
-		conn.SendMessage("identify "+h.config.Password, "NickServ")
+		if h.config.Password != "" {
+			conn.SendMessage("identify "+h.config.Password, "NickServ")
+		}
 
 		for _, ch := range h.config.Channels { //join all the channels in the config
 			conn.JoinChannel(ch)
@@ -43,8 +46,10 @@ func (h MessageHandler) Handle(conn client.Client, message model.Message) {
 	}
 
 	if message.Type == client.JOIN && message.Sender.Nick != conn.Nick { //Greet user who joined channel
-		if h.in_array(h.config.ModeratedChannels, message.Location) {
-			h.commandHandler.UnmuteUser(conn, message.Sender.Nick, message.Location)
+		if h.in_array(h.config.ModeratedChannels, message.Location) &&
+			!h.voiceService.IsMuted(message.Sender.Nick, message.Location) {
+
+			h.voiceService.GiveVoice(message.Sender.Nick, message.Location)
 		}
 
 		go func() { //to avoid sending the message so fast that the user doesn't notice it
@@ -72,11 +77,21 @@ func (h MessageHandler) Handle(conn client.Client, message model.Message) {
  * returns true if there was really a command in the message
  */
 func (h MessageHandler) doCommand(conn client.Client, message model.Message, senderIsAdmin bool) bool {
-	commandString := strings.TrimPrefix(message.Message, h.config.Nick+":")
+	commandString := strings.Trim(strings.TrimPrefix(message.Message, h.config.Nick+":"), " ")
 
-	if strings.HasPrefix(commandString, "mute ") {
-		h.commandHandler.MuteUser(conn, commandString)
-		return true
+	if senderIsAdmin && strings.HasPrefix(commandString, service.MUTE_PREFIX) {
+		nick := strings.Trim(strings.TrimPrefix(commandString, service.MUTE_PREFIX), " ")
+		if !strings.Contains(nick, " ") {
+			h.voiceService.MuteUser(nick, message.Location)
+			return true
+		}
+	}
+	if senderIsAdmin && strings.HasPrefix(commandString, service.UNMUTE_PREFIX) {
+		nick := strings.Trim(strings.TrimPrefix(commandString, service.UNMUTE_PREFIX), " ")
+		if !strings.Contains(nick, " ") {
+			h.voiceService.UnmuteUser(nick, message.Location)
+			return true
+		}
 	}
 
 	return false
