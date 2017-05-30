@@ -44,7 +44,7 @@ func (h MessageHandler) Handle(conn client.Client, message model.Message) {
 
 	if message.Type == client.JOIN && message.Sender.Nick != conn.Nick { //Greet user who joined channel
 		if h.in_array(h.config.ModeratedChannels, message.Location) {
-			conn.SetMode(message.Location, "+v", message.Sender.Nick)
+			h.commandHandler.UnmuteUser(conn, message.Sender.Nick, message.Location)
 		}
 
 		go func() { //to avoid sending the message so fast that the user doesn't notice it

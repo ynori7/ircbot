@@ -6,15 +6,22 @@ import (
 )
 
 type CommandHandler struct {
-	config ircconfig.IrcConfig
+	config     ircconfig.IrcConfig
+	mutedUsers []string //todo: make this a map and add a mutex
 }
 
 func NewCommandHandler(config ircconfig.IrcConfig) CommandHandler {
 	return CommandHandler{
-		config: config,
+		config:     config,
+		mutedUsers: make([]string, 0),
 	}
 }
 
-func (h CommandHandler) MuteUser(conn client.Client, command string) {
+func (h CommandHandler) UnmuteUser(conn client.Client, nick, location string) {
+	conn.SetMode(location, "+v", nick)
+	//todo remove from list
+}
+
+func (h CommandHandler) MuteUser(conn client.Client, command, location string) {
 	//todo
 }
