@@ -33,7 +33,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	messageHandler := handler.NewMessageHandler(config)
+	commandHandler := handler.NewCommandHandler(config)
+	messageHandler := handler.NewMessageHandler(config, commandHandler)
 
 	conn.Listen(messageHandler.Handle)
 

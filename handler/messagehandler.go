@@ -10,20 +10,22 @@ import (
 	"github.com/ynori7/ircbot/library"
 )
 
-type Handler struct {
-	config ircconfig.IrcConfig
+type MessageHandler struct {
+	config         ircconfig.IrcConfig
+	commandHandler CommandHandler
 }
 
-func NewMessageHandler(config ircconfig.IrcConfig) Handler {
-	return Handler{
-		config: config,
+func NewMessageHandler(config ircconfig.IrcConfig, commandHandler CommandHandler) MessageHandler {
+	return MessageHandler{
+		config:         config,
+		commandHandler: commandHandler,
 	}
 }
 
 /**
  * Performs the designated action according to the content of the message received.
  */
-func (h Handler) Handle(conn client.Client, message model.Message) {
+func (h MessageHandler) Handle(conn client.Client, message model.Message) {
 	if message.Type == client.PING {
 		conn.Pong(message.Message)
 	}
@@ -53,23 +55,37 @@ func (h Handler) Handle(conn client.Client, message model.Message) {
 
 	if message.Type == client.PRIVMSG {
 		isAdmin := h.in_array(h.config.Admins, message.Sender.Nick)
+		isCommand := false
 
 		if strings.HasPrefix(message.Message, h.config.Nick+":") {
-			h.doCommand(conn, message, isAdmin)
+			isCommand = h.doCommand(conn, message, isAdmin)
 		}
 
-		h.doConversation(conn, message, isAdmin)
+		if !isCommand {
+			h.doConversation(conn, message, isAdmin)
+		}
 	}
 }
 
-func (h Handler) doCommand(conn client.Client, message model.Message, senderIsAdmin bool) {
-	//todo
+/**
+ * Handles explicit commands issued to the bot. Commands are prefixed with the bot's name and a colon
+ * returns true if there was really a command in the message
+ */
+func (h MessageHandler) doCommand(conn client.Client, message model.Message, senderIsAdmin bool) bool {
+	commandString := strings.TrimPrefix(message.Message, h.config.Nick+":")
+
+	if strings.HasPrefix(commandString, "mute ") {
+		h.commandHandler.MuteUser(conn, commandString)
+		return true
+	}
+
+	return false
 }
 
 /**
  * Handles conversational type messages like talking to other users.
  */
-func (h Handler) doConversation(conn client.Client, message model.Message, senderIsAdmin bool) {
+func (h MessageHandler) doConversation(conn client.Client, message model.Message, senderIsAdmin bool) {
 	location := message.Location
 	//Handle the case when user is talking to me in private message, not in channel
 	if message.Location == conn.Nick {
@@ -97,7 +113,7 @@ func (h Handler) doConversation(conn client.Client, message model.Message, sende
  * Returns true if needle occurs in haystack, otherwise false.
  * Not sure why there isn't already a function for this.
  */
-func (h Handler) in_array(haystack []string, needle string) bool {
+func (h MessageHandler) in_array(haystack []string, needle string) bool {
 	for _, v := range haystack {
 		if v == needle {
 			return true
