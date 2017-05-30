@@ -2,12 +2,12 @@ package handler
 
 import (
 	"strings"
-        "time"
+	"time"
 
 	"github.com/ynori7/go-irc/client"
 	"github.com/ynori7/go-irc/model"
-	"github.com/ynori7/ircbot/library"
 	"github.com/ynori7/ircbot/ircconfig"
+	"github.com/ynori7/ircbot/library"
 )
 
 type Handler struct {
@@ -29,7 +29,7 @@ func (h Handler) Handle(conn client.Client, message model.Message) {
 	}
 
 	if message.Type == "001" { //001 appears when we've connected and the server starts talking to us
-                conn.SendMessage("identify " + h.config.Password, "NickServ")
+		conn.SendMessage("identify "+h.config.Password, "NickServ")
 
 		for _, ch := range h.config.Channels { //join all the channels in the config
 			conn.JoinChannel(ch)
@@ -43,11 +43,11 @@ func (h Handler) Handle(conn client.Client, message model.Message) {
 	if message.Type == "JOIN" && message.Sender.Nick != conn.Nick { //Greet user who joined channel
 		if h.in_array(h.config.ModeratedChannels, message.Location) {
 			conn.SetMode(message.Location, "+v", message.Sender.Nick)
-                }
-                go func(){ //to avoid sending the message so fast that the user doesn't notice it
+		}
+		go func() { //to avoid sending the message so fast that the user doesn't notice it
 			time.Sleep(500 * time.Millisecond)
-			conn.SendMessage(h.config.GetRandomGreeting() + " " + message.Sender.Nick, message.Location)
-                }()
+			conn.SendMessage(h.config.GetRandomGreeting()+" "+message.Sender.Nick, message.Location)
+		}()
 	}
 	if message.Type == "PRIVMSG" {
 		h.Conversation(conn, message)
@@ -60,7 +60,7 @@ func (h Handler) Handle(conn client.Client, message model.Message) {
 func (h Handler) Conversation(conn client.Client, message model.Message) {
 	location := message.Location
 	//Handle the case when user is talking to me in private message, not in channel
-	if(message.Location == conn.Nick) {
+	if message.Location == conn.Nick {
 		location = message.Sender.Nick
 	}
 
@@ -68,7 +68,7 @@ func (h Handler) Conversation(conn client.Client, message model.Message) {
 		words := strings.Fields(message.Message)
 
 		//respond to greetings
-		if h.in_array(h.config.Greetings, strings.ToLower(words[0])){
+		if h.in_array(h.config.Greetings, strings.ToLower(words[0])) {
 			conn.SendMessage(h.config.GetRandomGreeting(), location)
 		}
 	}

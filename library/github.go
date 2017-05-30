@@ -1,19 +1,19 @@
 package library
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
-	"encoding/json"
 )
 
 type GithubRepo struct {
-	User string
-	Repo string
-	Link string
+	User        string
+	Repo        string
+	Link        string
 	Description string
-	Language string
+	Language    string
 }
 
 /*
@@ -42,7 +42,7 @@ func HandleGithubLink(str string) string {
  */
 func ParseGithubLink(input string) GithubRepo {
 	re, err := regexp.Compile(`(https?:\/\/)?github\.com\/([\w\-]+)\/([\w\-]+)`)
-	
+
 	if err == nil {
 		res := re.FindStringSubmatch(input)
 
@@ -52,11 +52,11 @@ func ParseGithubLink(input string) GithubRepo {
 				Repo: res[3],
 				Link: res[0],
 			}
-			
+
 			return repo
 		}
 	}
-	
+
 	return GithubRepo{}
 }
 

@@ -2,8 +2,9 @@ package ircconfig
 
 import (
 	"errors"
-	"gopkg.in/yaml.v2"
 	"math/rand"
+
+	"gopkg.in/yaml.v2"
 )
 
 type IrcConfig struct {

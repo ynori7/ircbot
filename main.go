@@ -1,14 +1,14 @@
 package main
 
 import (
-	"io/ioutil"
-	"os"
-	"log"
 	"errors"
+	"io/ioutil"
+	"log"
+	"os"
 
-	"github.com/ynori7/ircbot/ircconfig"
 	"github.com/ynori7/go-irc/client"
 	"github.com/ynori7/ircbot/handler"
+	"github.com/ynori7/ircbot/ircconfig"
 )
 
 func main() {
@@ -33,8 +33,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	handler := handler.NewMessageHandler(config)
+	messageHandler := handler.NewMessageHandler(config)
 
-	conn.Listen(handler.Handle)
+	conn.Listen(messageHandler.Handle)
 
 }
