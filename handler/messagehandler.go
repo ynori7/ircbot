@@ -24,7 +24,7 @@ func NewMessageHandler(config ircconfig.IrcConfig) Handler {
  * Performs the designated action according to the content of the message received.
  */
 func (h Handler) Handle(conn client.Client, message model.Message) {
-	if message.Type == "PING" {
+	if message.Type == client.PING {
 		conn.Pong(message.Message)
 	}
 
@@ -36,28 +36,40 @@ func (h Handler) Handle(conn client.Client, message model.Message) {
 		}
 	}
 
-	if message.Type == "KICK" && message.Message == conn.Nick {
+	if message.Type == client.KICK && message.Message == conn.Nick {
 		conn.JoinChannel(message.Location) //rejoin the channel I was kicked from
 	}
 
-	if message.Type == "JOIN" && message.Sender.Nick != conn.Nick { //Greet user who joined channel
+	if message.Type == client.JOIN && message.Sender.Nick != conn.Nick { //Greet user who joined channel
 		if h.in_array(h.config.ModeratedChannels, message.Location) {
 			conn.SetMode(message.Location, "+v", message.Sender.Nick)
 		}
+
 		go func() { //to avoid sending the message so fast that the user doesn't notice it
 			time.Sleep(500 * time.Millisecond)
 			conn.SendMessage(h.config.GetRandomGreeting()+" "+message.Sender.Nick, message.Location)
 		}()
 	}
-	if message.Type == "PRIVMSG" {
-		h.Conversation(conn, message)
+
+	if message.Type == client.PRIVMSG {
+		isAdmin := h.in_array(h.config.Admins, message.Sender.Nick)
+
+		if strings.HasPrefix(message.Message, h.config.Nick+":") {
+			h.doCommand(conn, message, isAdmin)
+		}
+
+		h.doConversation(conn, message, isAdmin)
 	}
+}
+
+func (h Handler) doCommand(conn client.Client, message model.Message, senderIsAdmin bool) {
+	//todo
 }
 
 /**
  * Handles conversational type messages like talking to other users.
  */
-func (h Handler) Conversation(conn client.Client, message model.Message) {
+func (h Handler) doConversation(conn client.Client, message model.Message, senderIsAdmin bool) {
 	location := message.Location
 	//Handle the case when user is talking to me in private message, not in channel
 	if message.Location == conn.Nick {
