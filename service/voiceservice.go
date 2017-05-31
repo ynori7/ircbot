@@ -26,7 +26,7 @@ func NewVoiceService(conn client.Client) VoiceService {
 	}
 }
 
-func (s VoiceService) IsMuted(nick, location string) bool {
+func (s *VoiceService) IsMuted(nick, location string) bool {
 	s.mutedUsersMutex.Lock()
 	defer s.mutedUsersMutex.Unlock()
 
@@ -43,7 +43,7 @@ func (s VoiceService) GiveVoice(nick, location string) {
 	s.connection.SetMode(location, "+v", nick)
 }
 
-func (s VoiceService) UnmuteUser(nick, location string) {
+func (s *VoiceService) UnmuteUser(nick, location string) {
 	s.mutedUsersMutex.Lock()
 	defer s.mutedUsersMutex.Unlock()
 
@@ -51,7 +51,7 @@ func (s VoiceService) UnmuteUser(nick, location string) {
 	delete(s.mutedUsers[location], nick)
 }
 
-func (s VoiceService) MuteUser(nick, location string) {
+func (s *VoiceService) MuteUser(nick, location string) {
 	s.mutedUsersMutex.Lock()
 	defer s.mutedUsersMutex.Unlock()
 
