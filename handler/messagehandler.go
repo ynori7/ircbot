@@ -27,7 +27,7 @@ func NewMessageHandler(config ircconfig.IrcConfig, voiceService service.VoiceSer
 /**
  * Performs the designated action according to the content of the message received.
  */
-func (h MessageHandler) Handle(conn client.Client, message model.Message) {
+func (h MessageHandler) Handle(conn *client.Client, message model.Message) {
         log.Println(message.Raw)
 
 	if message.Type == client.PING {
@@ -79,7 +79,7 @@ func (h MessageHandler) Handle(conn client.Client, message model.Message) {
  * Handles explicit commands issued to the bot. Commands are prefixed with the bot's name and a colon
  * returns true if there was really a command in the message
  */
-func (h MessageHandler) doCommand(conn client.Client, message model.Message, senderIsAdmin bool) bool {
+func (h MessageHandler) doCommand(conn *client.Client, message model.Message, senderIsAdmin bool) bool {
 	commandString := strings.Trim(strings.TrimPrefix(message.Message, h.config.Nick+":"), " ")
 
 	if senderIsAdmin && strings.HasPrefix(commandString, service.MUTE_PREFIX) {
@@ -103,7 +103,7 @@ func (h MessageHandler) doCommand(conn client.Client, message model.Message, sen
 /**
  * Handles conversational type messages like talking to other users.
  */
-func (h MessageHandler) doConversation(conn client.Client, message model.Message, senderIsAdmin bool) {
+func (h MessageHandler) doConversation(conn *client.Client, message model.Message, senderIsAdmin bool) {
 	location := message.Location
 	//Handle the case when user is talking to me in private message, not in channel
 	if message.Location == conn.Nick {
