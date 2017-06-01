@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -27,6 +28,8 @@ func NewMessageHandler(config ircconfig.IrcConfig, voiceService service.VoiceSer
  * Performs the designated action according to the content of the message received.
  */
 func (h MessageHandler) Handle(conn client.Client, message model.Message) {
+        log.Println(message.Raw)
+
 	if message.Type == client.PING {
 		conn.Pong(message.Message)
 	}

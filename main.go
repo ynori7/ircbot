@@ -29,10 +29,7 @@ func main() {
 	}
 
 	//Connect
-	conn, err := client.NewConnection(config.ConnectionString, config.UseSSL, config.Nick)
-	if err != nil {
-		log.Fatal(err)
-	}
+	conn := client.NewConnection(config.ConnectionString, config.UseSSL, config.Nick)
 
 	commandHandler := service.NewVoiceService(conn)
 	messageHandler := handler.NewMessageHandler(config, commandHandler)
