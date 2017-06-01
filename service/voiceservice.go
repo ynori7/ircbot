@@ -12,13 +12,13 @@ const (
 )
 
 type VoiceService struct {
-	connection client.Client
+	connection *client.Client
 
 	mutedUsers      map[string]map[string]bool //channel => map[nick]: true
 	mutedUsersMutex *sync.Mutex
 }
 
-func NewVoiceService(conn client.Client) VoiceService {
+func NewVoiceService(conn *client.Client) VoiceService {
 	return VoiceService{
 		connection:      conn,
 		mutedUsers:      make(map[string]map[string]bool),
